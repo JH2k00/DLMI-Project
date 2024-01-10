@@ -186,8 +186,6 @@ class Ui_MainWindow(object):
         self.actionSave.setObjectName("actionSave")
         self.actionExport_Logs = QtWidgets.QAction(MainWindow)
         self.actionExport_Logs.setObjectName("actionExport_Logs")
-        self.actionSeska_Ferkel = QtWidgets.QAction(MainWindow)
-        self.actionSeska_Ferkel.setObjectName("actionSeska_Ferkel")
         self.actionRun_Algorithm = QtWidgets.QAction(MainWindow)
         self.actionRun_Algorithm.setObjectName("actionRun_Algorithm")
         self.menuFile.addAction(self.actionImport)
@@ -229,7 +227,6 @@ class Ui_MainWindow(object):
         self.actionImport.setText(_translate("MainWindow", "Import"))
         self.actionSave.setText(_translate("MainWindow", "Save"))
         self.actionExport_Logs.setText(_translate("MainWindow", "Export Logs"))
-        self.actionSeska_Ferkel.setText(_translate("MainWindow", "Seska Ferkel"))
         self.actionRun_Algorithm.setText(_translate("MainWindow", "Run Algorithm"))
 
 

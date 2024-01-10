@@ -361,11 +361,6 @@
     <string>Export Logs</string>
    </property>
   </action>
-  <action name="actionSeska_Ferkel">
-   <property name="text">
-    <string>Seska Ferkel</string>
-   </property>
-  </action>
   <action name="actionRun_Algorithm">
    <property name="text">
     <string>Run Algorithm</string>
