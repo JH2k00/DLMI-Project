@@ -14,7 +14,7 @@ class CustomDataset(ImageFolder):
     def __init__(self, csv_file, root_dir, transform=None):
         # Adjust the labels in the dataset to be binary (Blood/Other)
         df = pd.read_csv(csv_file)
-        df['label'] = df['label'].apply(lambda x: 'Blood' if x == 'Blood' else 'Other')
+        df['label'] = df['label'].apply(lambda x: 1 if x.startswith('Blood') else 0)
         self.root_dir = root_dir
         self.transform = transform
         super(CustomDataset, self).__init__(root=self.root_dir, transform=self.transform)
