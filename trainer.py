@@ -19,21 +19,21 @@ def train_kc_model(model, optimizer, criterion, train_loader, val_loader, epochs
             output = model(images)
             loss = criterion(output, labels)
 
-            TP += torch.logical_and(output.argmax(dim=1).eq(1), labels.argmax(dim=1).eq(1)).sum()
-            PP += output.argmax(dim=1).eq(1).sum()
-            P += labels.argmax(dim=1).eq(1).sum()
-            accuracy += output.argmax(dim=1).eq(labels.argmax(dim=1)).sum()
-            epoch_loss += loss
+            TP += torch.logical_and(output.argmax(dim=1).eq(1), labels.argmax(dim=1).eq(1)).sum().detach().cpu()
+            PP += output.argmax(dim=1).eq(1).sum().detach().cpu()
+            P += labels.argmax(dim=1).eq(1).sum().detach().cpu()
+            accuracy += output.argmax(dim=1).eq(labels.argmax(dim=1)).sum().detach().cpu()
+            epoch_loss += loss.detach().cpu()
 
             loss.backward()
             optimizer.step()
 
-        accuracy = accuracy.detach().cpu() / N_train
-        precision = TP.detach().cpu() / PP.detach().cpu()
-        recall = TP.detach().cpu() / P.detach().cpu()
-        epoch_loss = epoch_loss.detach().cpu() / len(train_loader)
+        accuracy = accuracy / N_train
+        precision = TP / PP
+        recall = TP / P
+        epoch_loss = epoch_loss
         print("Training :")
-        print("Epoch : %d, Loss : %.2f, Accuracy : %.2f, Precision : %.2f, Recall : %.2f" 
+        print("Epoch : %d, Loss : %.3f, Accuracy : %.3f, Precision : %.3f, Recall : %.3f" 
                   %(epoch+1, loss, accuracy, precision, recall)) 
         
         model.eval()
@@ -50,16 +50,16 @@ def train_kc_model(model, optimizer, criterion, train_loader, val_loader, epochs
                 output = model(images)
                 loss = criterion(output, labels)
 
-                TP += torch.logical_and(output.argmax(dim=1).eq(1), labels.argmax(dim=1).eq(1)).sum()
-                PP += output.argmax(dim=1).eq(1).sum()
-                P += labels.argmax(dim=1).eq(1).sum()
-                accuracy += output.argmax(dim=1).eq(labels.argmax(dim=1)).sum()
+                TP += torch.logical_and(output.argmax(dim=1).eq(1), labels.argmax(dim=1).eq(1)).sum().detach().cpu()
+                PP += output.argmax(dim=1).eq(1).sum().detach().cpu()
+                P += labels.argmax(dim=1).eq(1).sum().detach().cpu()
+                accuracy += output.argmax(dim=1).eq(labels.argmax(dim=1)).sum().detach().cpu()
                 epoch_loss += loss
             
-            accuracy = accuracy.detach().cpu() / N_train
-            precision = TP.detach().cpu() / PP.detach().cpu()
-            recall = TP.detach().cpu() / P.detach().cpu()
-            epoch_loss = epoch_loss.detach().cpu() / len(train_loader)
+            accuracy = accuracy / N_val
+            precision = TP / PP
+            recall = TP / P
+            epoch_loss = epoch_loss
             print("Validating :")
-            print("Epoch : %d, Loss : %.2f, Accuracy : %.2f, Precision : %.2f, Recall : %.2f" 
+            print("Epoch : %d, Loss : %.3f, Accuracy : %.3f, Precision : %.3f, Recall : %.3f" 
                     %(epoch+1, loss, accuracy, precision, recall))
