@@ -28,10 +28,10 @@ def train_kc_model(model, optimizer, criterion, train_loader, val_loader, epochs
             loss.backward()
             optimizer.step()
 
-        accuracy /= N_train
-        precision = TP / PP
-        recall = TP / P
-        epoch_loss /= len(train_loader)
+        accuracy = accuracy.detach().cpu() / N_train
+        precision = TP.detach().cpu() / PP.detach().cpu()
+        recall = TP.detach().cpu() / P.detach().cpu()
+        epoch_loss = epoch_loss.detach().cpu() / len(train_loader)
         print("Training :")
         print("Epoch : %d, Loss : %.2f, Accuracy : %.2f, Precision : %.2f, Recall : %.2f" 
                   %(epoch+1, loss, accuracy, precision, recall)) 
@@ -56,10 +56,10 @@ def train_kc_model(model, optimizer, criterion, train_loader, val_loader, epochs
                 accuracy += output.argmax(dim=1).eq(labels.argmax(dim=1)).sum()
                 epoch_loss += loss
             
-            accuracy /= N_val
-            precision = TP / PP
-            recall = TP / P
-            epoch_loss /= len(val_loader)
+            accuracy = accuracy.detach().cpu() / N_train
+            precision = TP.detach().cpu() / PP.detach().cpu()
+            recall = TP.detach().cpu() / P.detach().cpu()
+            epoch_loss = epoch_loss.detach().cpu() / len(train_loader)
             print("Validating :")
             print("Epoch : %d, Loss : %.2f, Accuracy : %.2f, Precision : %.2f, Recall : %.2f" 
                     %(epoch+1, loss, accuracy, precision, recall))
