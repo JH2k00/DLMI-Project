@@ -1,6 +1,8 @@
 import torch
+import gc
+import os
 
-def train_kc_model(model, optimizer, criterion, train_loader, val_loader, epochs, device): # TODO Scheduler
+def train_kc_model(model, optimizer, criterion, train_loader, val_loader, scaler, model_name, epochs, device): # TODO Scheduler
     N_train = len(train_loader.dataset)
     N_val = len(val_loader.dataset)
     for epoch in range(epochs):
@@ -13,25 +15,31 @@ def train_kc_model(model, optimizer, criterion, train_loader, val_loader, epochs
         epoch_loss = 0
 
         for batch_idx, (images, labels) in enumerate(train_loader):
+            torch.cuda.empty_cache()
+            gc.collect()
             optimizer.zero_grad()
             images = images.to(device)
             labels = labels.to(device)
-            output = model(images)
-            loss = criterion(output, labels)
+            with torch.autocast(device_type='cuda'):
+                output = model(images)
+                loss = criterion(output, labels)
 
-            TP += torch.logical_and(output.argmax(dim=1).eq(1), labels.argmax(dim=1).eq(1)).sum().detach().cpu()
-            PP += output.argmax(dim=1).eq(1).sum().detach().cpu()
-            P += labels.argmax(dim=1).eq(1).sum().detach().cpu()
-            accuracy += output.argmax(dim=1).eq(labels.argmax(dim=1)).sum().detach().cpu()
-            epoch_loss += loss.detach().cpu()
+            TP += torch.logical_and(output.argmax(dim=1).eq(1), labels.argmax(dim=1).eq(1)).sum()
+            PP += output.argmax(dim=1).eq(1).sum()
+            P += labels.argmax(dim=1).eq(1).sum()
+            accuracy += output.argmax(dim=1).eq(labels.argmax(dim=1)).sum()
+            epoch_loss += loss
 
-            loss.backward()
-            optimizer.step()
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1) # TODO Try different values and Scheduler
+            scaler.step(optimizer)
+            scaler.update()
 
-        accuracy = accuracy / N_train
-        precision = TP / PP
-        recall = TP / P
-        epoch_loss = epoch_loss
+        accuracy = accuracy.detach().cpu() / N_train
+        precision = TP.detach().cpu() / PP.detach().cpu()
+        recall = TP.detach().cpu() / P.detach().cpu()
+        epoch_loss = epoch_loss.detach().cpu()
         print("Training :")
         print("Epoch : %d, Loss : %.3f, Accuracy : %.3f, Precision : %.3f, Recall : %.3f" 
                   %(epoch+1, loss, accuracy, precision, recall)) 
@@ -47,8 +55,9 @@ def train_kc_model(model, optimizer, criterion, train_loader, val_loader, epochs
             for batch_idx, (images, labels) in enumerate(val_loader):
                 images = images.to(device)
                 labels = labels.to(device)
-                output = model(images)
-                loss = criterion(output, labels)
+                with torch.autocast(device_type='cuda'):
+                    output = model(images)
+                    loss = criterion(output, labels)
 
                 TP += torch.logical_and(output.argmax(dim=1).eq(1), labels.argmax(dim=1).eq(1)).sum().detach().cpu()
                 PP += output.argmax(dim=1).eq(1).sum().detach().cpu()
@@ -63,3 +72,8 @@ def train_kc_model(model, optimizer, criterion, train_loader, val_loader, epochs
             print("Validating :")
             print("Epoch : %d, Loss : %.3f, Accuracy : %.3f, Precision : %.3f, Recall : %.3f" 
                     %(epoch+1, loss, accuracy, precision, recall))
+        checkpoint = {"model_state_dict": model.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "scaler": scaler.state_dict()}
+        torch.save(checkpoint, os.path.join("saved_models", "%s.pt"%model_name))
+        print('Model is stored at folder:{}'.format('saved_models/'+'%s.pt'%model_name))
