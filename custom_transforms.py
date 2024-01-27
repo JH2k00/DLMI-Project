@@ -11,7 +11,7 @@ np.random.seed(0)
 class RandomChoiceExtended():
     def __init__(self, transforms_list, min_transforms, max_transforms):
         """
-            FIXME IMPORTANT : DOESN'T GUARANTEE THAT DIFFERENT TRANSFORMATIONS ARE APPLIED EACH ITERATION
+            FIXME ? IMPORTANT : DOESN'T GUARANTEE THAT DIFFERENT TRANSFORMATIONS ARE APPLIED EACH ITERATION
         """
         assert min_transforms >= 0 , "Min number of transforms must be bigger or equal to zero"
         assert max_transforms <= len(transforms_list), "Max number of transforms should be smaller than the number of available transforms"
