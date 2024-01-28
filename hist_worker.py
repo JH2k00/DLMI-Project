@@ -28,6 +28,6 @@ class Hist_Worker(QObject):
         ax.set_ylabel("Sample pdf")
         ax.legend()
         canvas.draw()
-        width, height = fig.figbbox.width, fig.figbbox.height
+        width, height = int(fig.figbbox.width), int(fig.figbbox.height)
         img = QtGui.QImage(canvas.buffer_rgba(), width, height, QtGui.QImage.Format_ARGB32)
         self.hist_signal.emit((QtGui.QPixmap(img), tab_idx))
