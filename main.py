@@ -130,7 +130,13 @@ class GUI(QtWidgets.QMainWindow):
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    gui_player = GUI(dl_model_path=r"C:\Users\JadHa\Desktop\Uni\DLMI-Project\saved_models\ResNet_SimCLR.pt", ml_model_path=r"xgboost_clf.json", device=torch.device("cuda"))
+    with_gpu = torch.cuda.is_available()
+    if with_gpu:
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")    
+    print('We are now using %s.' % device)
+    gui_player = GUI(dl_model_path=r"saved_models\ResNet_SimCLR.pt", ml_model_path=r"xgboost_clf.json", device=device)
     gui_player.show()
 
     sys.exit(app.exec())
