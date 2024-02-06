@@ -8,6 +8,7 @@ import torch
 import numpy as np
 from feature_extraction import calc_allfeatures
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 
 class KC_Dataset(Dataset):
@@ -63,6 +64,13 @@ class KC_Dataset_preloaded(Dataset):
         image = self.x[index]
         label = self.y[index]
         if(self.simclr):
+            image_aug = self.transforms(image)
+            image_all = torch.cat([image, image_aug], dim=2)
+            plt.figure(dpi=600)
+            plt.imshow(image_all.permute(1,2,0).numpy())
+            plt.axis('off')
+            plt.savefig(r"images/OriginalvsAug_%d.pdf"%index, bbox_inches='tight')
+            plt.show()
             view1 = self.normalize(self.transforms(image))
             view2 = self.normalize(self.transforms(image))
             return view1, view2, label
